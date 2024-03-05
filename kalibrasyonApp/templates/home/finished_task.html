@@ -1,0 +1,403 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}FİNİSHED LİST{% endblock %}
+{% block navbar %}
+    <ul class="nav justify-content-end bg-secondary">
+        <li class="nav-item">
+            <a class="nav-link active text-white">{{ user.username|title }}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active text-white" aria-current="page" href="/">Çıkış</a>
+        </li>
+    </ul>
+{% endblock navbar %}
+{% block content %}
+    <nav class="d-flex justify-content-center">
+        <ul class="nav nav-tabs fs-5">
+            <li class="nav-item">
+                <a href="/kalibrasyonApp/home/{{ username }}"
+                   class="nav-link"
+                   aria-current="page">Anasayfa</a>
+            </li>
+            <li class="nav-item">
+                <a href="/kalibrasyonApp/home/{{ username }}/task_list" class="nav-link">Bekleyen işler</a>
+            </li>
+            <li class="nav-item">
+                <a href="/kalibrasyonApp/home/{{ username }}/task_list/finished_task"
+                   class="nav-link">Biten işler</a>
+            </li>
+        </ul>
+        <button type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
+            EXCEL OLUŞTUR
+        </button>
+    </nav>
+    <div class="d-flex mt-3">
+        <button class="btn bg-success p-2 text-dark bg-opacity-50 flex-fill"
+                id="filterOpen"
+                type="button">
+            <span class="material-symbols-outlined">filter_list</span>
+        </button>
+    </div>
+    <form method="POST" id="FilterForm">
+        {% csrf_token %}
+        <div class="row my-2" id="filterForm">
+            <div class="col-6">
+                <label for="gorev-numrasi" class="form-label">Görev numrası:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="gorev-numrasi"
+                       name="gorevnumrasi"
+                       aria-label=".form-control-sm example"/>
+                <label for="envanter-numarasi" class="form-label">Envanter numrası:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="envanter-numarasi"
+                       name="envanter-numarasi"
+                       aria-label=".form-control-sm example"/>
+                <label for="envanter-tipi" class="form-label">Envanter tipi:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="envanter-tipi"
+                       name="envanter-tipi"
+                       aria-label=".form-control-sm example"/>
+                <label for="marka" class="form-label">Marka:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="marka"
+                       name="marka"
+                       aria-label=".form-control-sm example"/>
+                <label for="model" class="form-label">Model:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="model"
+                       name="model"
+                       aria-label=".form-control-sm example"/>
+            </div>
+            <div class="col-6">
+                <label for="serino" class="form-label">Seri No:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="serino"
+                       name="serino"
+                       aria-label=".form-control-sm example"/>
+                <label for="gorev-tipi" class="form-label">Görev tipi:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="gorev-tipi"
+                       name="gorev-tipi"
+                       aria-label=".form-control-sm example"/>
+                <label for="plan-tarih" class="form-label me-3">Plan tarihi:</label>
+                <br/>
+                <input type="date" id="plan-tarih" name="plan-tarih" value=""/>
+                <br/>
+                <label for="sube" class="form-label">Şube:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="sube"
+                       name="sube"
+                       aria-label=".form-control-sm example"/>
+                <label for="komum" class="form-label">Konum:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       id="konum"
+                       name="konum"
+                       aria-label=".form-control-sm example"/>
+            </div>
+            <div id="person">
+                <label for="yapan kişi" class="form-label">Yapan kişi:</label>
+                <input class="form-control form-control-sm"
+                       type="text"
+                       aria-label=".form-control-sm example"/>
+            </div>
+            <button type="submit"
+                    class="btn bg-secondary bg-gradient my-2 border-0 text-white-50"
+                    name="filter">ARA</button>
+            <a class="btn bg-secondary bg-gradient text-white"
+               href="/kalibrasyonApp/home/sezer.polat/task_list"
+               role="button">TEMİZLE</a>
+        </div>
+    </form>
+    <div class="overflow-auto" id="wait-table">
+        <table class="table table-success table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Görev numarası</th>
+                    <th scope="col">Envanter kodu</th>
+                    <th scope="col">Envanter tipi</th>
+                    <th scope="col">Envanter alt tipi</th>
+                    <th scope="col">Marka</th>
+                    <th scope="col">
+                        Model
+                    </th>
+                    <th scope="col">
+                        Seri numarası
+                    </th>
+                    <th scope="col">
+                        Görev tipi
+                    </th>
+                    <th scope="col">
+                        Görev adı
+                    </th>
+                    <th scope="col">
+                        Plan tarihi
+                    </th>
+                    <th scope="col">
+                        Görev durumu
+                    </th>
+                    <th scope="col">
+                        Açıklama
+                    </th>
+                    <th scope="col">
+                        Sorumlu tipi
+                    </th>
+                    <th scope="col">
+                        Sorumlu kişi
+                    </th>
+                    <th scope="col">
+                        Tamamlama tarih
+                    </th>
+                    <th scope="col">
+                        Şube
+                    </th>
+                    <th scope="col">
+                        Bina
+                    </th>
+                    <th scope="col">
+                        Kat
+                    </th>
+                    <th scope="col">
+                        Konum
+                    </th>
+                    <th scope="col">
+                        Yapan kişi
+                    </th>
+                    <th scope="col">
+                        Etiket
+                    </th>
+                    <th scope="col">
+                        Kullanıcı
+                    </th>
+                    <th scope="col">
+                    </th>
+                </tr>
+            </thead>
+            <tbody id="Tables">
+                {% for item in  task_list %}
+                    <tr>
+                        <th scope="row">
+                            {{ forloop.counter }}
+                        </th>
+                        <td>
+                            {{ item.task_number }}
+                        </td>
+                        <td>
+                            {{ item.inventory_code }}
+                        </td>
+                        <td>
+                            {{ item.inventory_type }}
+                        </td>
+                        <td>
+                            {{ item.inventory_sub_type }}
+                        </td>
+                        <td>
+                            {{ item.device_brand }}
+                        </td>
+                        <td>
+                            {{ item.device_model }}
+                        </td>
+                        <td>
+                            {{ item.serial_number }}
+                        </td>
+                        <td>
+                            {{ item.task_type }}
+                        </td>
+                        <td>
+                            {{ item.task_name }}
+                        </td>
+                        <td>
+                            {{ item.plan_date }}
+                        </td>
+                        <td>
+                            {{ item.task_status }}
+                        </td>
+                        <td>
+                            {{ item.explanation }}
+                        </td>
+                        <td>
+                            {{ item.liable_type }}
+                        </td>
+                        <td>
+                            {{ item.responsible }}
+                        </td>
+                        <td>
+                            {{ item.completion_date }}
+                        </td>
+                        <td>
+                            {{ item.branch }}
+                        </td>
+                        <td>
+                            {{ item.branch_building }}
+                        </td>
+                        <td>
+                            {{ item.building_floor }}
+                        </td>
+                        <td>
+                            {{ item.location }}
+                        </td>
+                        <td>
+                            {{ item.person_doing }}
+                        </td>
+                        <td>
+                            {{ item.label }}
+                        </td>
+                        <td>
+                            {{ item.user }}
+                        </td>
+                        <td>
+                            <a class="btn btn-primary"
+                               href="measurement/{{ item.task_number }}/"
+                               role="button">Ölçüm</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+<!-- Modal -->
+<div class="modal fade"
+     id="exampleModal"
+     tabindex="-1"
+     aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">
+                    EXCEL
+                </h1>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="GET">
+                    <select class="form-select"
+                            aria-label="Default select example"
+                            name="dropdown">
+                        <option value="branch_option" selected>
+                            Şube
+                        </option>
+                        {% for branch in branch_list %}
+                            {% ifchanged %}
+                                {% for local in branch %}
+                                    <option value="{{ local }}">
+                                        {{ local }}
+                                    </option>
+                                {% endfor %}
+                            {% endifchanged %}
+                        {% endfor %}
+                    </select>
+                    <form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            KAPAT
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            OLUŞTUR
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <nav class="my-3" aria-label="Page navigation example">
+            <ul class="pagination justify-content-center">
+                {% if task_list.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ task_list.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">1</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=2">2</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=3">3</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=4">4</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=5">5</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=7">6</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=8">7</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=8">8</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=9">9</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page=10">10</a>
+                </li>
+                {% if task_list.has_next  %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ task_list.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ task_list.paginator.num_pages }}">last</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endblock content %}
+    {% block js %}
+        <script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+        {% comment %} <script type="text/javascript" language="javascript" src="{% static 'index.js' %}"></script> {% endcomment %}
+        <script>
+    //table screen height
+    
+    $(document).ready(function(){
+        screenHeight=$(window).height();
+        $("#wait-table").css("height",screenHeight-270)
+        $("#nav-end").css("height",screenHeight)
+    })
+
+
+    //filter input display
+    $(document).ready(function(){
+        $("#person").hide()
+    })
+
+    //console.log(displayTo)
+    $(document).ready(function(){
+        $("#FilterForm").hide()
+        $("#filterOpen").click(function(){
+            const displayTo=$("#FilterForm").css("display")
+            if(displayTo === "none"){
+                return $("#FilterForm").show()
+            }else{
+                $("#FilterForm").hide()
+            }
+            console.log(displayTo)
+        })
+    })
+
+
+        </script>
+    {% endblock js %}

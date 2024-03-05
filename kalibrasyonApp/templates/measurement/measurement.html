@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    Measurement
+{% endblock title %}
+{% block navbar %}
+    <ul class="nav justify-content-end bg-secondary">
+        <li class="nav-item">
+            <a class="nav-link active text-white">{{ user.username|title }}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active text-white"
+               aria-current="page">Çıkış</a>
+        </li>
+    </ul>
+{% endblock navbar %}
+{% block content %}
+    <nav class="d-flex justify-content-center">
+        <ul class="nav nav-tabs fs-5">
+            <li class="nav-item">
+                <a href="/kalibrasyonApp/home/{{username}}" class="nav-link" aria-current="page">Anasayfa</a>
+            </li>
+            <li class="nav-item">
+                <a href="/kalibrasyonApp/home/{{username}}/task_list" class="nav-link">Bekleyen işler</a>
+            </li>
+            <li class="nav-item">
+                <a href="/kalibrasyonApp/home/{{username}}/task_list/finished_task" class="nav-link">Biten işler</a>
+            </li>
+        </ul>
+        <button type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
+            EXCEL OLUŞTUR
+        </button>
+    </nav>
+    {% for measurements in measurement %}
+        <div class="container">
+        <div class="row"><p>Görev numrası: {{ measurements.task_number }}</p></div>
+        <div class="row"><p>Envanter numrası: {{ measurements.inventory_code }}</p></div>
+        <div class="row"><p>Envanter alt tipi: {{ measurements.inventory_type }}</p></div>
+        <div class="row"><p>Marka: {{ measurements.device_brand }}</p></div>
+        <div class="row"><p>Model: {{ measurements.device_model }}</p></div>
+        <div class="row"><p>Seri numarası: {{ measurements.serial_number }}</p></div>
+        <div class="row"><p>Şube: {{ measurements.branch }}</p></div>
+        <div class="row"><p>Konum: {{ measurements.location }}</p></div>
+        <div class="row"><p>Yapan kişi: {{ measurements.person_doing }}</p></div>
+        <div class="row"><p>Test başlığı: {{ measurements.test_header }}</p></div>
+        <div class="row"><p>Test süresi: {{ measurements.test_times }}</p></div>
+        <div class="row"><p><img src="/kalibrasyonApp/media/{{ measurements.device_image }}" class="img-thumbnail" height="200px" width="200px"/></p></div>
+        <div class="row"><p>Ölçüm: {{ measurements.measurement_result }}</p></div>
+       <div class="row"><p>Fonskiyon Test: {{ measurements.functionData }}</p></div>
+       <div class="row"><p>Ölçüm: {{ measurements.functionTest }}</p></div>
+       <div class="row"><p>Ölçüm: {{ measurements.calibratorData}}</p></div>
+        </div> 
+    {% endfor %}
+{% endblock content %}

@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}
+  Home
+{% endblock title %}
+{% block navbar %}
+  <ul class="nav justify-content-end bg-secondary">
+    <li class="nav-item">
+      <a class="nav-link active text-white" href="/admin">Admin</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active text-white">{{ user.username|title }}</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active text-white" aria-current="page" href="/">Çıkış</a>
+    </li>
+  </ul>
+{% endblock navbar %}
+{% block content %}
+  <nav>
+    <ul class="nav nav-tabs justify-content-center fs-5">
+      <li class="nav-item">
+        <a href="/kalibrasyonApp/home/{{ username }}"
+           class="nav-link disable"
+           aria-current="page">Anasayfa</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/kalibrasyonApp/home/{{ username }}/task_list">Bekleyen işler</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link"
+           href="/kalibrasyonApp/home/{{ username }}/task_list/finished_task">Biten işler</a>
+      </li>
+    </ul>
+  </nav>
+  <div class="container">
+    <div class="row justify-content-around my-2" id="graph-row">
+      <div class="col-lg-5 border">
+        <div id="TotalChart"></div>
+      </div>
+      <div class="col-lg-5 border">
+        <div id="userTotal" class="my-5" style="height: auto;"></div>
+      </div>
+    </div>
+    <div class="row justify-content-around my-2"  id="graph-row-2">
+      <div class="col-lg-5 border">
+        <div id="Taskchart" style="height: auto;"></div>
+      </div>
+      <div class="col-lg-5 border">
+        <div id="Finishchart" style="height: auto;"></div>
+      </div>
+    </div>
+    <div class="row ">
+      <form method="post">
+        {% csrf_token %}
+        <div class="row justify-content-around">
+          <div class="col-lg-5">
+            <select class="form-select"
+                    aria-label="Default select example"
+                    name="branch_select">
+              {% for branch in branch_set %}
+                <option value="{{ branch }}">
+                  {{ branch|upper }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-lg-5">
+            <div class="row">
+              <div class="col-lg-10">
+                <select class="form-select"
+                        aria-label="Default select example"
+                        name="plan_date_select">
+                  {% for date in date_select %}
+                    <option value="{{ date }}">
+                      {{ date }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-lg-2">
+                <button type="submit" class="btn btn-primary mb-3">Oluştur</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="row" id="user_branch_task">
+        <div class="col" id='user_branch_task'></div>
+      </div>
+    </div>
+  {% endblock content %}
+  {% block headerjs %}
+    {% if superusers %}
+      <script type="text/javascript">
+        google.charts.load("current",{"packages":['corechart']});
+         
+        google.charts.setOnLoadCallback(drawbranchTask);
+         //hastane bazlı beklyen iş sayısı
+        function drawbranchTask(){
+        
+       
+        const data =google.visualization.arrayToDataTable({{draw_branch_task}})
+         const options={
+            title:"Hastane Bazlı Bekleyen İş Oranı" ,
+            is3D:true
+         }
+         const chart = new google.visualization.PieChart(document.getElementById('Taskchart'));
+            chart.draw(data, options);
+         }
+         //hastana bazlı biten iş sayısı
+     
+        google.charts.setOnLoadCallback(drawbranchFinish);
+        function drawbranchFinish(){
+            const data=google.visualization.arrayToDataTable({{draw_branch_finished}});
+            const options={
+                title:"Hastane Bazlı Biten İş Oranı",
+                is3D:true
+            }
+            const chart=new google.visualization.PieChart(document.getElementById("Finishchart"));
+            chart.draw(data,options)
+        } 
+       //toplam iş
+    google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(TotalChart);
+
+      function TotalChart() {
+        const data = google.visualization.arrayToDataTable({{total_job}});
+
+        const options = {
+          chart: {
+            title: 'Toplam İş Listesi',
+            subtitle: 'Bekleyen ve biten iş listesi grafiği',
+          },
+          bars: 'vertical',
+          vAxis: {format: 'decimal'},
+          height: 450,
+          colors: ['#1b9e77', '#d95f02', '#7570b3']
+        };
+
+        const chart = new google.charts.Bar(document.getElementById('TotalChart'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+
+        const btns = document.getElementById('btn-group');
+
+      }
+      google.charts.load('current', {packages: ['corechart', 'bar']});
+google.charts.setOnLoadCallback(userTotal);
+
+function userTotal() {
+      const data = google.visualization.arrayToDataTable({{user_task_total_list}});
+
+      const options = {
+        title: 'Kullanıcı Bazlı Toplam İş',
+        chartArea: {width: '60%'},
+        hAxis: {
+          title: 'Toplam İş',
+          minValue: 0,
+          textStyle: {
+            bold: true,
+            fontSize: 12,
+            color: '#4d4d4d'
+          },
+          titleTextStyle: {
+            bold: true,
+            fontSize: 18,
+            color: '#4d4d4d'
+          }
+        },
+        vAxis: {
+          title: 'Kullanıcı',
+          textStyle: {
+            fontSize: 14,
+            bold: true,
+            color: '#848484'
+          },
+          titleTextStyle: {
+            fontSize: 14,
+            bold: true,
+            color: '#848484'
+          }
+        }
+       
+      };
+      const chart = new google.visualization.BarChart(document.getElementById('userTotal'));
+      chart.draw(data, options);
+    }
+     google.charts.load('current', {packages: ['corechart', 'bar']});
+    google.charts.setOnLoadCallback(user_branch_date);
+
+    function user_branch_date() {
+      const data = google.visualization.arrayToDataTable({{user_branch_task_date}});
+
+      const options = {
+        title: 'Kullanıcı Bazlı İş',
+        chartArea: {width: '60%'},
+        hAxis: {
+          title: 'Toplam İş',
+          minValue: 0,
+          textStyle: {
+            bold: true,
+            fontSize: 12,
+            color: '#4d4d4d'
+          },
+          titleTextStyle: {
+            bold: true,
+            fontSize: 18,
+            color: '#4d4d4d'
+          }
+        },
+        vAxis: {
+          title: 'Kullanıcı',
+          textStyle: {
+            fontSize: 14,
+            bold: true,
+            color: '#848484'
+          },
+          titleTextStyle: {
+            fontSize: 14,
+            bold: true,
+            color: '#848484'
+          }
+        }
+      };
+      const chart = new google.visualization.BarChart(document.getElementById('user_branch_task'));
+      chart.draw(data, options);
+    }
+      </script>
+      {% comment %} user {% endcomment %}
+    {% else %}
+      <script>
+        $(document).ready(function(){
+            $("#graph-row").hide();
+             $("#graph-row-2").hide()
+        }) 
+        $(document).ready(function(){
+          $("#user_branch_task">div).wrap("<div class='col-6'></div>");
+          $("#user_branch_task").addClass("justify-content-around");
+        })
+      </script>
+      <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        const data = google.visualization.arrayToDataTable({{user_branch_task_date}});
+
+        const options = {
+          chart: {
+            title: 'Toplam iş',
+            subtitle: 'Toplam iş sayısı grafiği',
+            chartArea: {width: '500%'},
+          },
+          bars: 'vertical',
+          vAxis: {format: 'decimal'},
+          height: 400,
+          colors: ['#1b9e77', '#d95f02', '#7570b3']
+        };
+
+        const chart = new google.charts.Bar(document.getElementById('user_branch_task'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+
+        
+      }
+      </script>
+    {% endif %}
+  {% endblock headerjs %}

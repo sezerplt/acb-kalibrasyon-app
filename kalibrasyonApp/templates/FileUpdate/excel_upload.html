@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    {% if IntegrityError_message %}
+        <h1 style="color:yellow;">{{IntegrityError_message}}</h1>
+  
+    {% elif date_format_error %}
+        <h1 style="color:yellow;">{{date_format_error}}</h1>
+    {% elif index_error %}
+        <h1 style="color:yellow;">{{index_error}}</h1>
+        {% elif user_error %}
+        <h1 style="color:yellow;">{{user_error}}</h1>
+    {% endif %}
+    <form action="{% url 'kalibrasyonApp:excel_upload' %}" method="post" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{form}}
+        <input type="submit" value="Excel Ekle">
+    </form>
+</div>
+
+{{ block.super }}
+{% endblock %}
